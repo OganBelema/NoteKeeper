@@ -1,5 +1,6 @@
 package com.secureidltd.belemaogan.notekeeper;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,11 +10,16 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
+
+    public static final String NOTE_INFO = "com.secureidltd.belemaogan.notekeeper.NOTE_INFO";
+    private NoteInfo mNoteInfo;
+    private Boolean mIsNewNote = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,39 @@ public class NoteActivity extends AppCompatActivity {
 
         spinnerCourses.setAdapter(adapterCourses);
 
+
+        readDisplayStateValues();
+
+        EditText textNoteTitle = findViewById(R.id.text_note_title);
+        EditText textNoteText = findViewById(R.id.text_note_text);
+
+        if (!mIsNewNote){
+            displayNote(spinnerCourses, textNoteTitle, textNoteText);
+        }
+    }
+
+    private void displayNote(Spinner spinnerCourses, EditText textNoteTitle, EditText textNoteText) {
+        if (mNoteInfo != null){
+
+            if (spinnerCourses.getAdapter() instanceof ArrayAdapter){
+                int itemPosition = ((ArrayAdapter) spinnerCourses.getAdapter()).getPosition(mNoteInfo.getCourse());
+                spinnerCourses.setSelection(itemPosition);
+            }
+
+            textNoteTitle.setText(mNoteInfo.getTitle());
+
+            textNoteText.setText(mNoteInfo.getText());
+        }
+    }
+
+    private void readDisplayStateValues() {
+        Intent intent = getIntent();
+
+        if (intent != null && intent.hasExtra(NOTE_INFO)){
+            mNoteInfo = intent.getParcelableExtra(NOTE_INFO);
+        } else {
+            mIsNewNote = true;
+        }
     }
 
     @Override
