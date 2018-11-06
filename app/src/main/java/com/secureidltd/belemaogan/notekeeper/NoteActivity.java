@@ -19,6 +19,7 @@ import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
 
+    private final String TAG = getClass().getSimpleName();
     public static final String NOTE_POSITION = "com.secureidltd.belemaogan.notekeeper.NOTE_POSITION";
     public static final int DEFAULT_POSITION_VALUE = -1;
     private static final String ORIGINAL_COURSE_ID = "com.secureidltd.belemaogan.notekeeper.ORIGINAL_COURSE_ID";
