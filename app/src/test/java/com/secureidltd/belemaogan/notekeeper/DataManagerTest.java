@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 
 public class DataManagerTest {
 
-    static DataManager sDataManager;
+    private static DataManager sDataManager;
 
     @BeforeClass
     public static void classSetup(){
