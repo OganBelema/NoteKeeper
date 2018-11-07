@@ -8,9 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import java.util.List;
 
@@ -19,6 +16,7 @@ import java.util.List;
  **/
 
 public class NoteListActivity extends AppCompatActivity {
+    private NoteRecyclerAdapter mNoteRecyclerAdapter;
 
     //private ArrayAdapter<NoteInfo> mAdapterNotes;
 
@@ -58,14 +56,18 @@ public class NoteListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });*/
-        final RecyclerView recyclerViewNotes = findViewById(R.id.list_notes);
+        final RecyclerView recyclerViewNotes = findViewById(R.id.list_items);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerViewNotes.setLayoutManager(layoutManager);
+
+        List<NoteInfo> notes = DataManager.getInstance().getNotes();
+        mNoteRecyclerAdapter = new NoteRecyclerAdapter(this, notes);
+        recyclerViewNotes.setAdapter(mNoteRecyclerAdapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //mAdapterNotes.notifyDataSetChanged();
+        mNoteRecyclerAdapter.notifyDataSetChanged();
     }
 }
