@@ -60,8 +60,10 @@ public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAd
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(v, mCourseInfoList.get(mCurrentPosition).getTitle(),
-                            Snackbar.LENGTH_LONG).show();
+                    Intent courseNotesIntent = new Intent(mContext, NoteListActivity.class);
+                    courseNotesIntent.putExtra(NoteListActivity.COURSE_ID,
+                            mCourseInfoList.get(mCurrentPosition).getCourseId());
+                    mContext.startActivity(courseNotesIntent);
                 }
             });
         }
