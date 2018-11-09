@@ -2,6 +2,7 @@ package com.secureidltd.belemaogan.notekeeper;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayoutManager mNoteLayoutManager;
     private CourseRecyclerAdapter mCourseRecyclerAdapter;
     private GridLayoutManager mCoursesLayoutManager;
+    private NoteKeeperOpenHelper mNoteKeeperOpenHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mNoteKeeperOpenHelper = new NoteKeeperOpenHelper(this);
 
         FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerViewItems.setLayoutManager(mNoteLayoutManager);
         mRecyclerViewItems.setAdapter(mNoteRecyclerAdapter);
 
+        SQLiteDatabase db = mNoteKeeperOpenHelper.getReadableDatabase();
         selectNavigationMenuItem(R.id.nav_notes);
     }
 
@@ -182,5 +187,11 @@ public class MainActivity extends AppCompatActivity
         String favouriteSocial = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString("user_favourite_social", "");
         Snackbar.make(view, "Share to "+favouriteSocial, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mNoteKeeperOpenHelper.close();
+        super.onDestroy();
     }
 }
