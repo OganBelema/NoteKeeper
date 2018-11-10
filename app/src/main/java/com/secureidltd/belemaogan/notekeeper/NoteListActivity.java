@@ -58,8 +58,7 @@ public class NoteListActivity extends AppCompatActivity {
 
             setTitle(courseInfo.getTitle());
 
-            mNoteInfoList = DataManager.getInstance().getNotes(courseInfo);
-            mNoteRecyclerAdapter = new NoteRecyclerAdapter(this, mNoteInfoList);
+            mNoteRecyclerAdapter = new NoteRecyclerAdapter(this, null);
             recyclerViewNotes.setAdapter(mNoteRecyclerAdapter);
         }
 

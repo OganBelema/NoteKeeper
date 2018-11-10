@@ -2,6 +2,7 @@ package com.secureidltd.belemaogan.notekeeper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,16 +10,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
+
 import java.util.List;
 
 public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder>{
 
     private Context mContext;
-    private List<NoteInfo> mNoteInfoList;
+    private Cursor mCursor;
+    private int mCourseIdColumnIndex;
+    private int mNoteTitleColumnIndex;
+    private int mNoteIdColumnIndex;
 
-    public NoteRecyclerAdapter(Context context, List<NoteInfo> noteInfoList) {
+    public NoteRecyclerAdapter(Context context, Cursor cursor) {
         mContext = context;
-        mNoteInfoList = noteInfoList;
+        mCursor = cursor;
+        populateColumnIndexes();
     }
 
     @NonNull
@@ -29,19 +36,44 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
         return new ViewHolder(itemView);
     }
 
+    public void changeCursor(Cursor cursor){
+        if (mCursor != null){
+            mCursor.close();
+        }
+
+        mCursor = cursor;
+        populateColumnIndexes();
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
-        NoteInfo noteInfo = mNoteInfoList.get(position);
-        viewHolder.mCourseTextView.setText(noteInfo.getCourse().getTitle());
-        viewHolder.mTitleTextView.setText(noteInfo.getTitle());
-        viewHolder.mId = noteInfo.getId();
+
+        mCursor.moveToPosition(position);
+        String courseId = mCursor.getString(mCourseIdColumnIndex);
+        String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
+        int noteId = mCursor.getInt(mNoteIdColumnIndex);
+
+        viewHolder.mCourseTextView.setText(courseId);
+        viewHolder.mTitleTextView.setText(noteTitle);
+        viewHolder.mId = noteId;
+    }
+
+    private void populateColumnIndexes() {
+        if (mCursor == null)
+            return;
+
+        mCourseIdColumnIndex = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_COURSE_ID);
+        mNoteTitleColumnIndex = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_NOTE_TITLE);
+        mNoteIdColumnIndex = mCursor.getColumnIndex(NoteInfoEntry._ID);
+
     }
 
     @Override
     public int getItemCount() {
 
-        if (mNoteInfoList != null){
-            return mNoteInfoList.size();
+        if (mCursor != null){
+            return mCursor.getCount();
         }
 
         return 0;
