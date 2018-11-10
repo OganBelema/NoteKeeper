@@ -11,6 +11,7 @@ public final class NoteInfo implements Parcelable{
     private CourseInfo mCourse;
     private String mTitle;
     private String mText;
+    private int mId;
 
     public NoteInfo(CourseInfo course, String title, String text) {
         mCourse = course;
@@ -18,10 +19,18 @@ public final class NoteInfo implements Parcelable{
         mText = text;
     }
 
+    public NoteInfo(CourseInfo course, String title, String text, int id) {
+        mCourse = course;
+        mTitle = title;
+        mText = text;
+        mId = id;
+    }
+
     protected NoteInfo(Parcel in) {
         mCourse = in.readParcelable(CourseInfo.class.getClassLoader());
         mTitle = in.readString();
         mText = in.readString();
+        mId = in.readInt();
     }
 
     public static final Creator<NoteInfo> CREATOR = new Creator<NoteInfo>() {
@@ -60,6 +69,14 @@ public final class NoteInfo implements Parcelable{
         mText = text;
     }
 
+    public int getId() {
+        return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
     private String getCompareKey() {
         return mCourse.getCourseId() + "|" + mTitle + "|" + mText;
     }
@@ -94,5 +111,6 @@ public final class NoteInfo implements Parcelable{
         dest.writeParcelable(mCourse, 0);
         dest.writeString(mTitle);
         dest.writeString(mText);
+        dest.writeInt(mId);
     }
 }
