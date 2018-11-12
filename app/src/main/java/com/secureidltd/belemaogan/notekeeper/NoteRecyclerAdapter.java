@@ -10,15 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
-
-import java.util.List;
 
 public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder>{
 
     private Context mContext;
     private Cursor mCursor;
-    private int mCourseIdColumnIndex;
+    private int mCourseTitleColumnIndex;
     private int mNoteTitleColumnIndex;
     private int mNoteIdColumnIndex;
 
@@ -50,7 +49,7 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
 
         mCursor.moveToPosition(position);
-        String courseId = mCursor.getString(mCourseIdColumnIndex);
+        String courseId = mCursor.getString(mCourseTitleColumnIndex);
         String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
         int noteId = mCursor.getInt(mNoteIdColumnIndex);
 
@@ -63,7 +62,7 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
         if (mCursor == null)
             return;
 
-        mCourseIdColumnIndex = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_COURSE_ID);
+        mCourseTitleColumnIndex = mCursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_TITLE);
         mNoteTitleColumnIndex = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_NOTE_TITLE);
         mNoteIdColumnIndex = mCursor.getColumnIndex(NoteInfoEntry._ID);
 
