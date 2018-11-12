@@ -6,8 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,19 +27,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static final int NOTES_LOADER = 1;
     private NoteRecyclerAdapter mNoteRecyclerAdapter;
     private RecyclerView mRecyclerViewItems;
     private LinearLayoutManager mNoteLayoutManager;
     private CourseRecyclerAdapter mCourseRecyclerAdapter;
     private GridLayoutManager mCoursesLayoutManager;
     private NoteKeeperOpenHelper mNoteKeeperOpenHelper;
+    private final static int COURSE_LOADER = 0;
+    private Cursor mCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,10 +88,23 @@ public class MainActivity extends AppCompatActivity
 
         mNoteRecyclerAdapter = new NoteRecyclerAdapter(this, null);
 
-        List<CourseInfo> courses = DataManager.getInstance().getCourses();
-        mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, courses);
+
+        mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, null);
+        //loadCourses();
+        getSupportLoaderManager().initLoader(COURSE_LOADER, null, this);
 
         displayNotes();
+    }
+
+    private void loadCourses() {
+        SQLiteDatabase sqLiteDatabase = mNoteKeeperOpenHelper.getReadableDatabase();
+        String[] columns = new String[]{
+                CourseInfoEntry.COLUMN_COURSE_ID,
+                CourseInfoEntry.COLUMN_COURSE_TITLE
+        };
+        Cursor cursor = sqLiteDatabase.query(CourseInfoEntry.TABLE_NAME, columns, null,
+                null, null, null, CourseInfoEntry.COLUMN_COURSE_TITLE);
+        mCourseRecyclerAdapter.swapCursor(cursor);
     }
 
     private void displayNotes() {
@@ -111,7 +131,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        loadNotes();
+        //loadNotes();
+        getSupportLoaderManager().restartLoader(NOTES_LOADER, null, this);
         updateNavHeader();
     }
 
@@ -207,5 +228,71 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         mNoteKeeperOpenHelper.close();
         super.onDestroy();
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle bundle) {
+        Loader<Cursor> cursorLoader = null;
+
+        if (id == COURSE_LOADER){
+            cursorLoader = getCourseLoader();
+        } else if (id == NOTES_LOADER){
+            cursorLoader =  getNoteLoader();
+        }
+
+        return cursorLoader;
+    }
+
+    private Loader<Cursor> getNoteLoader() {
+        return new CursorLoader(this){
+            @Override
+            public Cursor loadInBackground() {
+                SQLiteDatabase database = mNoteKeeperOpenHelper.getReadableDatabase();
+                String[] noteColumns = {
+                        NoteInfoEntry.COLUMN_COURSE_ID,
+                        NoteInfoEntry.COLUMN_NOTE_TITLE,
+                        NoteInfoEntry._ID};
+                String orderNoteBy = NoteInfoEntry.COLUMN_COURSE_ID + ", " + NoteInfoEntry.COLUMN_NOTE_TITLE;
+                return database.query(NoteInfoEntry.TABLE_NAME, noteColumns, null, null,
+                        null, null, orderNoteBy);
+            }
+        };
+    }
+
+    private Loader<Cursor> getCourseLoader() {
+        return new CursorLoader(this){
+            @Override
+            public Cursor loadInBackground() {
+                SQLiteDatabase sqLiteDatabase = mNoteKeeperOpenHelper.getReadableDatabase();
+                String[] columns = new String[]{
+                        CourseInfoEntry.COLUMN_COURSE_ID,
+                        CourseInfoEntry.COLUMN_COURSE_TITLE
+                };
+                return sqLiteDatabase.query(CourseInfoEntry.TABLE_NAME, columns, null,
+                        null, null, null, CourseInfoEntry.COLUMN_COURSE_TITLE);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        if (loader.getId() == COURSE_LOADER){
+            mCursor = cursor;
+            mCourseRecyclerAdapter.swapCursor(cursor);
+        } else if (loader.getId() == NOTES_LOADER){
+            mNoteRecyclerAdapter.changeCursor(cursor);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        if (loader.getId() == COURSE_LOADER){
+            if (mCursor != null){
+                mCursor.close();
+            }
+        } else if (loader.getId() == NOTES_LOADER){
+            mNoteRecyclerAdapter.changeCursor(null);
+        }
     }
 }

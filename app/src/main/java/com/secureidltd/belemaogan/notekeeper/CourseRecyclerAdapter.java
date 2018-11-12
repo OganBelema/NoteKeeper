@@ -2,24 +2,44 @@ package com.secureidltd.belemaogan.notekeeper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
+import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 
 public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAdapter.ViewHolder>{
 
     private Context mContext;
-    private List<CourseInfo> mCourseInfoList;
+    private Cursor mCursor;
+    private int mCourseTitleColumnIndex;
+    private int mCourseIdIndex;
 
-    public CourseRecyclerAdapter(Context context, List<CourseInfo> courseInfoList) {
+    public CourseRecyclerAdapter(Context context, Cursor cursor) {
         mContext = context;
-        mCourseInfoList = courseInfoList;
+        mCursor = cursor;
+        setUpColumns();
+    }
+
+    public void swapCursor(Cursor cursor){
+        if (mCursor != null){
+            mCursor.close();
+        }
+
+        mCursor = cursor;
+        setUpColumns();
+        notifyDataSetChanged();
+    }
+
+    private void setUpColumns() {
+        if (mCursor != null){
+            mCourseTitleColumnIndex = mCursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_TITLE);
+            mCourseIdIndex = mCursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_ID);
+        }
     }
 
     @NonNull
@@ -32,16 +52,23 @@ public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
-        CourseInfo courseInfo = mCourseInfoList.get(position);
-        viewHolder.mCourseTextView.setText(courseInfo.getTitle());
-        viewHolder.mCurrentPosition = position;
+        if (mCursor == null)
+            return;
+
+        mCursor.moveToPosition(position);
+
+        String courseTitle = mCursor.getString(mCourseTitleColumnIndex);
+        String courseId = mCursor.getString(mCourseIdIndex);
+
+        viewHolder.mCourseTextView.setText(courseTitle);
+        viewHolder.mCourseId = courseId;
     }
 
     @Override
     public int getItemCount() {
 
-        if (mCourseInfoList != null){
-            return mCourseInfoList.size();
+        if (mCursor != null){
+            return mCursor.getCount();
         }
 
         return 0;
@@ -50,7 +77,7 @@ public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAd
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mCourseTextView;
-        public int mCurrentPosition;
+        public String mCourseId;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -62,7 +89,7 @@ public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAd
                 public void onClick(View v) {
                     Intent courseNotesIntent = new Intent(mContext, NoteListActivity.class);
                     courseNotesIntent.putExtra(NoteListActivity.COURSE_ID,
-                            mCourseInfoList.get(mCurrentPosition).getCourseId());
+                            mCourseId);
                     mContext.startActivity(courseNotesIntent);
                 }
             });
