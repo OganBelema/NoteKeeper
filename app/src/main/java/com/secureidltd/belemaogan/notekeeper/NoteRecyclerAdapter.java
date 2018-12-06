@@ -48,14 +48,16 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
 
-        mCursor.moveToPosition(position);
-        String courseId = mCursor.getString(mCourseTitleColumnIndex);
-        String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
-        int noteId = mCursor.getInt(mNoteIdColumnIndex);
+        if (!mCursor.isClosed()){
+            mCursor.moveToPosition(position);
+            String courseId = mCursor.getString(mCourseTitleColumnIndex);
+            String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
+            int noteId = mCursor.getInt(mNoteIdColumnIndex);
 
-        viewHolder.mCourseTextView.setText(courseId);
-        viewHolder.mTitleTextView.setText(noteTitle);
-        viewHolder.mId = noteId;
+            viewHolder.mCourseTextView.setText(courseId);
+            viewHolder.mTitleTextView.setText(noteTitle);
+            viewHolder.mId = noteId;
+        }
     }
 
     private void populateColumnIndexes() {

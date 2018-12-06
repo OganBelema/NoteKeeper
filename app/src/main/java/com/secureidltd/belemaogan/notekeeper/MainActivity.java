@@ -27,6 +27,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.secureidltd.belemaogan.mynotekeeperprovidercontract.NoteKeeperProviderContract;
+import com.secureidltd.belemaogan.mynotekeeperprovidercontract.NoteKeeperProviderContract.Notes;
 import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity
 
         mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, null);
         //loadCourses();
-        getSupportLoaderManager().initLoader(COURSE_LOADER, null, this);
+        getSupportLoaderManager().restartLoader(COURSE_LOADER, null, this);
 
         displayNotes();
     }
@@ -245,24 +247,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private Loader<Cursor> getNoteLoader() {
-        return new CursorLoader(this){
-            @Override
-            public Cursor loadInBackground() {
-                SQLiteDatabase database = mNoteKeeperOpenHelper.getReadableDatabase();
-                String[] noteColumns = {
-                        NoteInfoEntry.COLUMN_NOTE_TITLE,
-                        NoteInfoEntry.getQName(NoteInfoEntry._ID),
-                CourseInfoEntry.COLUMN_COURSE_TITLE};
-                String orderNoteBy = CourseInfoEntry.COLUMN_COURSE_TITLE + ", " + NoteInfoEntry.COLUMN_NOTE_TITLE;
-                //note_info JOIN course_info ON note_info.course_id = course_info.course_id
-                String tablesWithJoin = NoteInfoEntry.TABLE_NAME + " JOIN "
-                        + CourseInfoEntry.TABLE_NAME + " ON "
-                        + NoteInfoEntry.getQName(NoteInfoEntry.COLUMN_COURSE_ID)
-                        + " = " + CourseInfoEntry.getQName(CourseInfoEntry.COLUMN_COURSE_ID);
-                return database.query(tablesWithJoin, noteColumns, null, null,
-                        null, null, orderNoteBy);
-            }
-        };
+        String[] noteColumns = {
+                Notes.COLUMN_NOTE_TITLE,
+                Notes._ID,
+                NoteKeeperProviderContract.Courses.COLUMN_COURSE_TITLE};
+        String orderNoteBy = NoteKeeperProviderContract.Courses.COLUMN_COURSE_TITLE + ", " + Notes.COLUMN_NOTE_TITLE;
+
+        return new CursorLoader(this, Notes.CONTENT_EXPANDED_URI, noteColumns, null, null, orderNoteBy);
     }
 
     private Loader<Cursor> getCourseLoader() {
