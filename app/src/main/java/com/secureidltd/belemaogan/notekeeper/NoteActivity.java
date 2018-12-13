@@ -161,8 +161,8 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         AsyncTask task = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
-                Uri uri = ContentUris.withAppendedId(Notes.CONTENT_URI, mNoteId);
-                getContentResolver().delete(uri, null, null);
+                mNoteUri = ContentUris.withAppendedId(Notes.CONTENT_URI, mNoteId);
+                getContentResolver().delete(mNoteUri, null, null);
                 return null;
             }
         };
@@ -211,18 +211,20 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void displayNote() {
 
-        String courseId = mCursor.getString(mCourseIdColumnIndex);
-        String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
-        String noteText = mCursor.getString(mNoteTextColumnIndex);
+        if (!mCursor.isClosed()){
+            String courseId = mCursor.getString(mCourseIdColumnIndex);
+            String noteTitle = mCursor.getString(mNoteTitleColumnIndex);
+            String noteText = mCursor.getString(mNoteTextColumnIndex);
 
 
-        int courseIndex = getIndexOfCourseId(courseId);
-        mSpinnerCourses.setSelection(courseIndex);
+            int courseIndex = getIndexOfCourseId(courseId);
+            mSpinnerCourses.setSelection(courseIndex);
 
-        mTextNoteTitle.setText(noteTitle);
-        mTextNoteText.setText(noteText);
+            mTextNoteTitle.setText(noteTitle);
+            mTextNoteText.setText(noteText);
 
-        mCursor.close();
+            mCursor.close();
+        }
 
 
         /*if (mNoteInfo != null){
@@ -299,9 +301,18 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
             return true;
         } else if (id == R.id.action_next){
             moveNext();
+        } else if (id == R.id.action_set_reminder){
+            showReminderNotification();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showReminderNotification() {
+        String noteTitle = mTextNoteTitle.getText().toString();
+        String noteText = mTextNoteText.getText().toString();
+        int noteId = (int) ContentUris.parseId(mNoteUri);
+        NoteReminderNotification.notify(this, noteTitle, noteText, noteId);
     }
 
     private void moveNext() {
@@ -360,8 +371,8 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private CursorLoader createNotesLoader() {
         mNoteQueryFinished = false;
-        Uri uri = ContentUris.withAppendedId(Notes.CONTENT_URI, mNoteId);
-        return new CursorLoader(this, uri, null, null, null, null);
+        mNoteUri = ContentUris.withAppendedId(Notes.CONTENT_URI, mNoteId);
+        return new CursorLoader(this, mNoteUri, null, null, null, null);
     }
 
     @Override
