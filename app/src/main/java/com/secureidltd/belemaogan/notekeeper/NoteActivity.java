@@ -9,18 +9,21 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 
-import com.secureidltd.belemaogan.mynotekeeperprovidercontract.NoteKeeperProviderContract;
 import com.secureidltd.belemaogan.mynotekeeperprovidercontract.NoteKeeperProviderContract.Courses;
 import com.secureidltd.belemaogan.mynotekeeperprovidercontract.NoteKeeperProviderContract.Notes;
 import com.secureidltd.belemaogan.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
@@ -61,6 +64,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     private boolean mCourseQueryFinished;
     private boolean mNoteQueryFinished;
     private Uri mNoteUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,14 +136,67 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void createNewNote() {
+        AsyncTask<ContentValues, Integer, Uri> task = new AsyncTask<ContentValues, Integer, Uri>() {
+            private ProgressBar mProgressBar;
+
+            @Override
+            protected void onPreExecute() {
+                mProgressBar = findViewById(R.id.progressBar);
+                mProgressBar.setVisibility(View.VISIBLE);
+                mProgressBar.setProgress(1);
+            }
+
+            @Override
+            protected Uri doInBackground(ContentValues... contentValues) {
+                ContentValues insertValues = contentValues[0];
+                Uri rowUri = getContentResolver().insert(Notes.CONTENT_URI, insertValues);
+                simulateLongRunningTask();
+                publishProgress(2);
+                Log.d(TAG,"doInBackground: "+ Thread.currentThread().getId());
+
+                simulateLongRunningTask();
+                publishProgress(3);
+                return rowUri;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                int progressValue = values[0];
+                mProgressBar.setProgress(progressValue);
+            }
+
+            @Override
+            protected void onPostExecute(Uri uri) {
+                mNoteUri = uri;
+                mNoteId = ContentUris.parseId(uri);
+                Log.d(TAG,"onPostExecute: "+ Thread.currentThread().getId());
+                mProgressBar.setVisibility(View.GONE);
+                displaySnackbar(uri);
+            }
+        };
+
         ContentValues contentValues = new ContentValues();
         contentValues.put(Notes.COLUMN_COURSE_ID, "");
         contentValues.put(Notes.COLUMN_NOTE_TITLE, "");
         contentValues.put(Notes.COLUMN_NOTE_TEXT, "");
 
-        mNoteUri = getContentResolver().insert(Notes.CONTENT_URI, contentValues);
-        mNoteId = ContentUris.parseId(mNoteUri);
+        /*mNoteUri = getContentResolver().insert(Notes.CONTENT_URI, contentValues);
+        mNoteId = ContentUris.parseId(mNoteUri);*/
+        task.execute(contentValues);
+        Log.d(TAG,"Call to execute: "+ Thread.currentThread().getId());
+    }
 
+    private void displaySnackbar(Uri uri) {
+        Snackbar.make(mTextNoteText, uri.toString(), Snackbar.LENGTH_LONG)
+                .show();
+    }
+
+    private void simulateLongRunningTask() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
