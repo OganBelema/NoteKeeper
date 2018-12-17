@@ -48,6 +48,10 @@
             android:authorities="com.secureidltd.belemaogan.notekeeper.provider"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name=".NoteBackupService"
+            android:exported="true"/>
     </application>
 
 </manifest>
