@@ -16,7 +16,7 @@ public class CourseEventBroadcastHelper {
     public static final String EXTRA_COURSE_ID = "com.secureidltd.belemaogan.notekeeper.extras.COURSE_ID";
     public static final String EXTRA_COURSE_MESSAGE = "com.secureidltd.belemaogan.notekeeper.extras.COURSE_MESSAGE";
 
-    public static void sendEventBraodcast(Context context, String courseId, String message){
+    public static void sendEventBroadcast(Context context, String courseId, String message){
 
         Intent intent = new Intent(ACTION_COURSE_EVENT);
         intent.putExtra(EXTRA_COURSE_ID, courseId);

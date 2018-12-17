@@ -1,5 +1,7 @@
 package com.secureidltd.belemaogan.notekeeper;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -7,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -280,7 +283,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
             mTextNoteTitle.setText(noteTitle);
             mTextNoteText.setText(noteText);
 
-            CourseEventBroadcastHelper.sendEventBraodcast(this, courseId, "Editing Note");
+            CourseEventBroadcastHelper.sendEventBroadcast(this, courseId, "Editing Note");
 
             mCursor.close();
         }
@@ -371,7 +374,30 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         String noteTitle = mTextNoteTitle.getText().toString();
         String noteText = mTextNoteText.getText().toString();
         int noteId = (int) ContentUris.parseId(mNoteUri);
-        NoteReminderNotification.notify(this, noteTitle, noteText, noteId);
+
+        Intent intent = new Intent(this, NoteReminderNotification.class);
+        intent.putExtra(NoteReminderReceiver.EXTRA_NOTE_TITLE, noteTitle);
+        intent.putExtra(NoteReminderReceiver.EXTRA_NOTE_TEXT, noteText);
+        intent.putExtra(NoteReminderReceiver.EXTRA_NOTE_ID, noteId);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        long currentTimeInMilliseconds = SystemClock.elapsedRealtime();
+
+        //one hour in milliseconds
+        long ONE_HOUR = 60 * 60 * 1000;
+
+        long TEN_SECONDS = 10 * 1000;
+
+        long alarmTime = currentTimeInMilliseconds + TEN_SECONDS;
+
+        if (alarmManager != null){
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, alarmTime, pendingIntent);
+        }
+
     }
 
     private void moveNext() {
