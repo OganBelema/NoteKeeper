@@ -67,7 +67,7 @@ public class CourseRecyclerAdapter extends RecyclerView.Adapter<CourseRecyclerAd
     @Override
     public int getItemCount() {
 
-        if (mCursor != null){
+        if (mCursor != null && !mCursor.isClosed()){
             return mCursor.getCount();
         }
 
