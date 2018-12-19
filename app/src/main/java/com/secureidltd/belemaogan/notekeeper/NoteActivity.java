@@ -76,6 +76,9 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ModuleStatusView moduleStatusView = findViewById(R.id.module_status);
+        moduleStatusView.setModuleStatus(new boolean[]{true, true, false, true, false, false, false, false});
+
         mNoteKeeperOpenHelper = new NoteKeeperOpenHelper(this);
 
         mSpinnerCourses = findViewById(R.id.spinner_courses);
