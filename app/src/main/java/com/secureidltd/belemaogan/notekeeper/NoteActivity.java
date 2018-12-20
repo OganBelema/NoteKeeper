@@ -67,6 +67,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     private boolean mCourseQueryFinished;
     private boolean mNoteQueryFinished;
     private Uri mNoteUri;
+    private ModuleStatusView mModuleStatusView;
 
 
     @Override
@@ -76,8 +77,8 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ModuleStatusView moduleStatusView = findViewById(R.id.module_status);
-        moduleStatusView.setModuleStatus(new boolean[]{true, true, false, true, false, false, false, false});
+        mModuleStatusView = findViewById(R.id.module_status);
+        loadModuleStatusValues();
 
         mNoteKeeperOpenHelper = new NoteKeeperOpenHelper(this);
 
@@ -111,6 +112,18 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
             //loadNoteData();
             getSupportLoaderManager().restartLoader(NOTES_LOADER, null, this);
         }
+    }
+
+    private void loadModuleStatusValues() {
+
+        int totalNumberOfModules = 11;
+        int completedNumberOfModules = 7;
+        boolean[] moduleStatus = new boolean[totalNumberOfModules];
+
+        for (int moduleIndex = 0; moduleIndex < completedNumberOfModules; moduleIndex++){
+            moduleStatus[moduleIndex] = true;
+        }
+        mModuleStatusView.setModuleStatus(moduleStatus);
     }
 
 
