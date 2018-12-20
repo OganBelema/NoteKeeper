@@ -1,8 +1,11 @@
 package com.secureidltd.belemaogan.notekeeper;
 
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.contrib.AccessibilityChecks;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheck;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -35,6 +38,11 @@ public class NoteCreationTest {
     @BeforeClass
     public static void classSetUp(){
         sDataManager = DataManager.getInstance();
+    }
+
+    @BeforeClass
+    public static void turnOnAccessibility(){
+        AccessibilityChecks.enable();
     }
 
     @Rule

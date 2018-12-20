@@ -119,4 +119,5 @@
     </string>
     <string name="action_back_up_notes">Backup Notes</string>
     <string name="action_upload_note">Upload Notes</string>
+    <string name="create_new_note">Create new note</string>
 </resources>
